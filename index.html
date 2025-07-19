@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fullscreen Video with Audio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: black;
+    }
+
+    #videoContainer {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: black;
+    }
+
+    video {
+      max-width: 100%;
+      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: black;
+    }
+
+    #startBtn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #startBtn svg {
+      width: 80px;
+      height: 80px;
+      fill: white;
+      transition: transform 0.2s ease;
+    }
+
+    #startBtn:hover svg {
+      transform: scale(1.1);
+      fill: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Play Button -->
+  <button id="startBtn" aria-label="Play">
+    <svg viewBox="0 0 100 100">
+      <polygon points="40,30 70,50 40,70" />
+    </svg>
+  </button>
+
+  <!-- Video Container -->
+  <div id="videoContainer">
+    <video id="myVideo" playsinline controls>
+      <source src="Wedding_Invitation.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const video = document.getElementById("myVideo");
+    const videoContainer = document.getElementById("videoContainer");
+
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    async function goFullscreenAndRotate() {
+      if (video.requestFullscreen) {
+        await video.requestFullscreen();
+      } else if (video.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen(); // for Safari
+      }
+
+      if (isMobile() && screen.orientation && screen.orientation.lock) {
+        try {
+          await screen.orientation.lock("landscape");
+        } catch (err) {
+          console.warn("Orientation lock failed or unsupported:", err.message);
+        }
+      }
+    }
+
+    startBtn.addEventListener("click", async () => {
+      startBtn.style.display = "none";
+      videoContainer.style.display = "flex"; // Activate container
+
+      try {
+        await goFullscreenAndRotate();
+        await video.play();
+        video.setAttribute("controls", "true");
+      } catch (err) {
+        console.error("Playback error:", err);
+        alert("Please tap the video to start. Some mobile browsers block autoplay with sound.");
+      }
+    });
+  </script>
+
+</body>
+</html>
